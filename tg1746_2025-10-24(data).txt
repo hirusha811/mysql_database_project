@@ -1,0 +1,74 @@
+---data for user table---
+
+INSERT INTO user (user_id, user_name, password, role, email, phone) VALUES
+('U001', 'Mr. Nimal Perera', 'password123', 'admin', 'nimalperera@gmail.com', '071-3423252'),
+('U002', 'Dr. Saman Kumara', 'password123', 'dean', 'samankumara@gmail.com', '076-6789900'),
+('U003', 'Mr. Sulochana Perera', 'password123', 'technical_officer', 'sulochanaperera@gmail.com', '071-3423252'),
+('U004', 'Mr. Nimal Santha', 'password123', 'technical_officer', 'nimalsantha@gmail.com', '071-3423252'),
+('U005', 'Ms. Nimali Kumari', 'password123', 'technical_officer', 'nimalikumari@gmail.com', '071-3423252'),
+('U006', 'Ms. Pamudi Perera', 'password123', 'technical_officer', 'Pamudi@gmail.com', '071-3423252'),
+('U007', 'Mr. Lalith Fernando', 'password123', 'technical_officer', 'Lalith@gmail.com', '071-3423252'),
+('U008', 'Ms. Nayomi Silva', 'password123', 'lecture', 'nayomia@gmail.com', '071-3423252'),
+('U009', 'Ms. Nilmini Perera', 'password123', 'lecture', 'nimali@gmail.com', '071-3423252'),
+('U010', 'Dr. Nimal Senanayake', 'password123', 'lecture', 'nimal@gmail.com', '071-3423252'),
+('U011', 'Dr. Supuni Perera', 'password123', 'lecture', 'supuni@gmail.com', '071-3423252'),
+('U012', 'Dr. Nuwani Fernando', 'password123', 'lecture', 'nuwani@gmail.com', '071-3423252'),
+('U013', 'Mr. Hirusha Perera', 'password123', 'student', 'hirusha@gmail.com', '077-2341234'),
+('U014', 'Mr. Sandeep Kumara', 'password123', 'student', 'sandeep@gmail.com', '076-2341234'),
+('U015', 'Mr. Kumara Silva', 'password123', 'student', 'kumara@gmail.com', '071-2341234'),
+('U016', 'Mr. Anjana Perera', 'password123', 'student', 'anjana@gmail.com', '070-2341234'),
+('U018', 'Mr. Sudeera Fernando', 'password123', 'student', 'sudeera@gmail.com', '072-2341234'),
+('U019', 'Mr. Bihan Piyumal', 'password123', 'student', 'bihan@gmail.com', '075-2341234'),
+('U020', 'Ms. Apuurvaa Silva', 'password123', 'student', 'apuurvaa@gmail.com', '077-2351235'),
+('U021', 'Ms. Tharushi Kumari', 'password123', 'student', 'tharushi@gmail.com', '076-2351235'),
+('U022', 'Mr. Thusith Perera', 'password123', 'student', 'thusith@gmail.com', '071-2351235'),
+('U023', 'Mr. Methmal Fernando', 'password123', 'student', 'methmal@gmail.com', '070-2351235'),
+('U024', 'Mr. Amal Kumara', 'password123', 'student', 'amal@gmail.com', '072-2351235'),
+('U025', 'Mr. Pumudu Perera', 'password123', 'student', 'pumudu@gmail.com', '075-2351235'),
+('U026', 'Mr. Sunimal Silva', 'password123', 'student', 'sunimal@gmail.com', '077-2361236'),
+('U027', 'Mr. Daham Kumara', 'password123', 'student', 'daham@gmail.com', '076-2361236'),
+('U028', 'Mr. Nipun Fernando', 'password123', 'student', 'nipun@gmail.com', '071-2361236'),
+('U029', 'Mr. Lakal Fonseka', 'password123', 'student', 'lakal@gmail.com', '071-2361236');
+
+
+---data for student table---
+
+INSERT INTO student(registration_no, full_name, user_id, dob, address, batch_year, status) VALUE
+('S001', 'Mr. Hirusha Perera', 'U013', '2001-08-14', '123 flower road,kaburupitiya', 2023, 'proper'),
+('S002', 'Mr. Kumara Silva', 'U014', '2002-03-22', '123 flower road,kaburupitiya', 2023, 'proper'),
+('S003', 'Mr. Kumara Silva', 'U015', '2000-11-07', '123 flower road,kaburupitiya', 2023, 'proper'),
+('S004',  'Mr. Anjana Perera', 'U016', '2003-05-18', '123 flower road,kaburupitiya', 2023, 'proper'),
+('S005', 'Mr. Sudeera Fernando', 'U018', '2001-12-03', '123 flower road,kaburupitiya', 2023, 'proper'),
+('S006', 'Mr. Bihan Piyumal', 'U019', '2002-09-25', '123 flower road,kaburupitiya', 2023, 'proper'),
+('S007', 'Ms. Apuurvaa Silva', 'U020', '2000-07-11', '123 flower road,kaburupitiya', 2023, 'proper'),
+('S008', 'Ms. Tharushi Kumari', 'U021', '2003-01-29', '123 flower road,kaburupitiya', 2023, 'proper'),
+('S009',  'Mr. Thusith Perera', 'U022', '2001-04-16', '123 flower road,kaburupitiya', 2023, 'proper'),
+('S010', 'Mr. Methmal Fernando', 'U023', '2002-10-08', '123 flower road,kaburupitiya', 2023, 'proper'),
+
+
+('S011', 'Mr. Amal Kumara', 'U024', '2000-03-15', '123 flower road,kaburupitiya', 2022, 'repeat'),
+('S012', 'Mr. Pumudu Perera', 'U025', '2001-07-22', '123 flower road,kaburupitiya', 2022, 'repeat'),
+('S013', 'Mr. Daham Kumara', 'U026', '2002-11-08', '123 flower road,kaburupitiya', 2022, 'repeat'),
+('S014', 'Mr. Daham Kumara', 'U027', '2000-05-19', '123 flower road,kaburupitiya', 2022, 'repeat'),
+('S015', 'Mr. Nipun Fernando', 'U028', '2001-09-30', '123 flower road,kaburupitiya', 2022, 'repeat'),
+('S016', 'Mr. Lakal Fernando', 'U029', '2002-12-08', '123 flower road,kaburupitiya', 2022, 'suspended');
+
+---data for medical table---
+
+INSERT INTO medical(registration_no,attendance_id ,leave_date, reason) VALUES
+('S001', 31, '2025-08-29', 'Common cold'),
+('S008', 58, '2025-08-12', 'Fever and flu'),
+('S002', 2, '2025-08-19', 'Fever and flu'),
+('S005', 415, '2025-08-26', 'Fever and flu'),
+('S006', 16, '2025-09-09', 'Dental surgery'),
+
+('S007', 727, '2025-08-05', 'Common cold'),
+('S003', 193, '2025-08-11', 'Headache'),
+('S004', 994, '2025-08-17', 'Stomach ache'),
+('S009', 739, '2025-08-23', 'Allergy'),
+('S001', 70, '2025-08-30', 'Sore throat'),
+('S005', 925, '2025-09-03', 'Eye irritation'),
+('S008', 378, '2025-09-07', 'Mild fever'),
+('S004', 594, '2025-09-13', 'Back pain'),
+('S002', 22, '2025-09-20', 'Cough'),
+('S003', 933, '2025-09-25', 'Nasal congestion');
