@@ -1,0 +1,128 @@
+-----Grade for each subjects, student and as a whole batch
+
+CREATE OR REPLACE VIEW indi_grade AS
+SELECT
+    registration_no,
+    course_name,
+	
+	-- 3 types grading for repaet, proper, suspended
+	
+	
+    CASE
+        WHEN status = 'repeat' THEN
+            CASE    
+                WHEN total >= 80 THEN 'C'
+                WHEN total >= 70 THEN 'C'
+                WHEN total >= 65 THEN 'C-'
+                WHEN total >= 60 THEN 'C'
+                WHEN total >= 55 THEN 'C'
+                WHEN total >= 50 THEN 'C'
+                WHEN total >= 45 THEN 'C'
+                WHEN total >= 40 THEN 'C'
+                WHEN total >= 35 THEN 'C-'
+                WHEN total >= 30 THEN 'D'
+                ELSE 'E'
+            END
+        WHEN status = 'proper' THEN
+            CASE    
+                WHEN total >= 85 THEN 'A+'
+                WHEN total >= 75 THEN 'A'
+                WHEN total >= 70 THEN 'A-'
+                WHEN total >= 65 THEN 'B+'
+                WHEN total >= 60 THEN 'B'
+                WHEN total >= 55 THEN 'B-'
+                WHEN total >= 50 THEN 'C+'
+                WHEN total >= 45 THEN 'C'
+                WHEN total >= 40 THEN 'C-'
+                WHEN total >= 35 THEN 'D'
+                ELSE 'E'
+            END
+		WHEN status = 'suspended' THEN 'WH'
+    END AS grade
+	
+FROM (
+
+    SELECT
+        m.registration_no,
+        c.course_name,
+        s.status,
+		
+		-- calculate the final marks
+		
+		
+        CASE 
+            WHEN c.course_type = 'BOTH' THEN 
+                (
+                    ((COALESCE(MAX(CASE WHEN m.status='Q1' THEN m.mark END), 0) +
+                      COALESCE(MAX(CASE WHEN m.status='Q2' THEN m.mark END), 0) +
+                      COALESCE(MAX(CASE WHEN m.status='Q3' THEN m.mark END), 0) -
+                      LEAST(
+                          COALESCE(MAX(CASE WHEN m.status='Q1' THEN m.mark END), 0),
+                          COALESCE(MAX(CASE WHEN m.status='Q2' THEN m.mark END), 0),
+                          COALESCE(MAX(CASE WHEN m.status='Q3' THEN m.mark END), 0)
+                      )
+                    ) / 2) * 0.10
+                ) +
+                (
+                    ((COALESCE(MAX(CASE WHEN m.status='MT' THEN m.mark END), 0) +
+                      COALESCE(MAX(CASE WHEN m.status='MP' THEN m.mark END), 0)
+                    ) / 2) * 0.25
+                ) +
+                (
+                    ((COALESCE(MAX(CASE WHEN m.status='FT' THEN m.mark END), 0) +
+                      COALESCE(MAX(CASE WHEN m.status='FP' THEN m.mark END), 0)
+                    ) / 2) * 0.70
+                ) +
+                (
+                    COALESCE(MAX(CASE WHEN m.status='A' THEN m.mark END), 0) * 0.05
+                )
+                
+            WHEN c.course_type = 'T' THEN
+                (
+                    ((COALESCE(MAX(CASE WHEN m.status='Q1' THEN m.mark END), 0) +
+                      COALESCE(MAX(CASE WHEN m.status='Q2' THEN m.mark END), 0) +
+                      COALESCE(MAX(CASE WHEN m.status='Q3' THEN m.mark END), 0) -
+                      LEAST(
+                          COALESCE(MAX(CASE WHEN m.status='Q1' THEN m.mark END), 0),
+                          COALESCE(MAX(CASE WHEN m.status='Q2' THEN m.mark END), 0),
+                          COALESCE(MAX(CASE WHEN m.status='Q3' THEN m.mark END), 0)
+                      )
+                    ) / 2) * 0.10
+                ) +
+                (
+                    COALESCE(MAX(CASE WHEN m.status='MT' THEN m.mark END), 0) * 0.25
+                ) +
+                (
+                    COALESCE(MAX(CASE WHEN m.status='FT' THEN m.mark END), 0) * 0.70
+                ) +
+                (
+                    COALESCE(MAX(CASE WHEN m.status='A' THEN m.mark END), 0) * 0.05
+                )
+                
+            WHEN c.course_type = 'P' THEN
+                (
+                    ((COALESCE(MAX(CASE WHEN m.status='Q1' THEN m.mark END), 0) +
+                      COALESCE(MAX(CASE WHEN m.status='Q2' THEN m.mark END), 0) +
+                      COALESCE(MAX(CASE WHEN m.status='Q3' THEN m.mark END), 0) -
+                      LEAST(
+                          COALESCE(MAX(CASE WHEN m.status='Q1' THEN m.mark END), 0),
+                          COALESCE(MAX(CASE WHEN m.status='Q2' THEN m.mark END), 0),
+                          COALESCE(MAX(CASE WHEN m.status='Q3' THEN m.mark END), 0)
+                      )
+                    ) / 2) * 0.10
+                ) +
+                (
+                    COALESCE(MAX(CASE WHEN m.status='MP' THEN m.mark END), 0) * 0.25
+                ) +
+                (
+                    COALESCE(MAX(CASE WHEN m.status='FP' THEN m.mark END), 0) * 0.70
+                ) +
+                (
+                    COALESCE(MAX(CASE WHEN m.status='A' THEN m.mark END), 0) * 0.05
+                )
+        END AS total
+    FROM marks m
+    JOIN course c ON c.course_code = m.course_code
+    JOIN student s ON s.registration_no = m.registration_no
+    GROUP BY m.registration_no, c.course_name, s.status, c.course_type
+) AS temp_table;
