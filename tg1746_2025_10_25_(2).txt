@@ -1,0 +1,155 @@
+DELIMITER //
+
+
+--CA marks for individual from registration_no
+
+
+
+CREATE PROCEDURE ca_individual(IN reg_no CHAR(10))
+BEGIN
+    DECLARE total_courses INT DEFAULT 0;
+    DECLARE count INT DEFAULT 0;
+    DECLARE curren_course VARCHAR(10);
+
+    DECLARE q1, q2, q3 DECIMAL(5,2);
+    DECLARE mt, mp, midsum, assesment, qmax, qsum, final_ca DECIMAL(6,2);
+    DECLARE ca_status VARCHAR(20);
+	DECLARE sub_status VARCHAR(20);
+	DECLARE stu_status CHAR(10);
+
+    -- tempory table for result
+    DROP TEMPORARY TABLE IF EXISTS temp_result;
+    CREATE TEMPORARY TABLE temp_result (
+        Registration_No CHAR(10),
+        Course_Code VARCHAR(10),
+        Q1 VARCHAR(5),
+        Q2 VARCHAR(5),
+        Q3 VARCHAR(5),
+        Mid_Marks VARCHAR(10),
+        Assignment_Marks VARCHAR(10),
+        Final_CA_Mark VARCHAR(10),
+        CA_Status VARCHAR(20)
+    );
+
+    -- get total count of courses
+    SELECT COUNT(DISTINCT course_code) INTO total_courses
+    FROM marks
+    WHERE registration_no = reg_no;
+
+    SELECT status INTO stu_status
+	FROM student
+	WHERE registration_no = reg_no;
+	
+	-- If student is suspended, fill WH for all
+	
+	IF (stu_status='suspended') THEN	
+		INSERT INTO temp_result
+		SELECT 
+			reg_no,
+			course_code,
+			'WH' AS Q1,
+			'WH' AS Q2,
+			'WH' AS Q3,
+			'WH' AS Mid_Marks,
+			'WH' AS Assignment_Marks,
+			'WH' AS Final_CA_Mark,
+			'WH' AS CA_Status
+		FROM marks
+		WHERE registration_no = reg_no
+		GROUP BY course_code;
+
+	ELSE
+		
+		WHILE count < total_courses DO
+			
+			SELECT DISTINCT course_code INTO curren_course
+			FROM marks
+			WHERE registration_no = reg_no
+			LIMIT 1 OFFSET count;
+
+			SELECT IFNULL(MAX(mark),0) INTO q1
+			FROM marks
+			WHERE registration_no = reg_no AND course_code = curren_course AND status='Q1';
+
+			SELECT IFNULL(MAX(mark),0) INTO q2
+			FROM marks
+			WHERE registration_no = reg_no AND course_code = curren_course AND status='Q2';
+
+			SELECT IFNULL(MAX(mark),0) INTO q3
+			FROM marks
+			WHERE registration_no = reg_no AND course_code = curren_course AND status='Q3';
+
+		    SELECT IFNULL(MAX(mark),0) INTO mt
+			FROM marks
+			WHERE registration_no = reg_no AND course_code = curren_course AND status='MT';
+
+			SELECT IFNULL(MAX(mark),0) INTO mp
+			FROM marks
+			WHERE registration_no = reg_no AND course_code = curren_course AND status='MP';
+
+			SELECT IFNULL(MAX(mark),0)*0.05 INTO assesment
+			FROM marks
+			WHERE registration_no = reg_no AND course_code = curren_course AND status='A';
+			
+			SELECT course.course_type INTO sub_status
+			FROM course
+			WHERE course.course_code = curren_course; 
+			
+			-- set best 2 quizzes
+			IF (q1 < q2 AND q1 < q3) THEN
+				SET qmax = q2 + q3;
+			ELSEIF (q2 < q3 AND q2 < q1) THEN
+				SET qmax = q3 + q1;
+			ELSE
+				SET qmax = q1 + q2;
+			END IF;
+
+			SET qsum = (qmax/2) * 0.10;
+
+			-- mid marks based on course type
+			IF (sub_status='BOTH') THEN
+				SET midsum = ((mt + mp)/2) * 0.25;
+			ELSEIF (sub_status='T') THEN
+				SET midsum = mt * 0.25;
+			ELSEIF (sub_status='P') THEN
+				SET midsum = mp * 0.25;
+			END IF;
+
+			-- final ca marks
+			SET final_ca = qsum + midsum + assesment;
+
+			-- pass/fail
+			IF final_ca >= 20 THEN
+				SET ca_status = 'CA_Pass';
+			ELSE
+				SET ca_status = 'CA_Fail';
+			END IF;
+
+			-- insert into temp_result
+			INSERT INTO temp_result
+			 VALUES (
+				reg_no, 
+				curren_course, 
+				FORMAT(q1,2), 
+				FORMAT(q2,2), 
+				FORMAT(q3,2), 
+				FORMAT(midsum,2), 
+				FORMAT(assesment,2), 
+				FORMAT(final_ca,2), 
+				ca_status
+			 );
+
+			SET count = count + 1;
+		END WHILE;
+	END IF;
+
+    -- final output
+    SELECT * FROM temp_result ORDER BY Course_Code;
+
+    DROP TEMPORARY TABLE IF EXISTS temp_result;
+END//
+
+DELIMITER ;
+
+
+CALL ca_individual('S016');
