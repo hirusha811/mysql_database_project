@@ -1,0 +1,209 @@
+-- view CA mark detail by giving course ocde and registration number
+DELIMITER //
+
+CREATE PROCEDURE individual_summary_update(in id char(10),IN course VARCHAR(10))
+BEGIN
+ 
+	DECLARE q1, q2, q3, mid_marks, mt_mark,mp_mark,assess_marks, top_two_total, final_ca_status DECIMAL(5,2) DEFAULT 0;
+	DECLARE s_status varchar(20);
+	
+	SELECT IFNULL(MAX(mark),0) INTO q1 
+	FROM marks
+	WHERE registration_no=id AND course_code=course AND status='Q1';
+
+	SELECT IFNULL(MAX(mark),0) INTO q2 
+	FROM marks
+	WHERE registration_no=id AND course_code=course AND status='Q2';
+
+	SELECT IFNULL(MAX(mark),0) INTO q3 
+	FROM marks
+	WHERE registration_no=id AND course_code=course AND status='Q3';
+
+	SELECT IFNULL(MAX(mark),0) INTO mt_mark 
+	FROM marks
+	WHERE registration_no=id AND course_code=course AND status='MT';
+
+	SELECT IFNULL(MAX(mark),0) INTO mp_mark 
+	FROM marks
+	WHERE registration_no=id AND course_code=course AND status='MP';
+
+	SELECT IFNULL(MAX(mark),0) INTO assess_marks 
+	FROM marks
+	WHERE registration_no=id AND course_code=course AND status='A';
+	
+	SELECT status INTO s_status
+	FROM student
+	WHERE registration_no=id;
+
+
+		IF (mt_mark > 0 AND mp_mark > 0) THEN
+			SET mid_marks = (mt_mark + mp_mark)/2;
+			ELSE
+			SET mid_marks = mt_mark + mp_mark;
+		END IF;
+
+			SELECT IFNULL(SUM(mark),0)
+			INTO assess_marks
+			FROM marks
+			WHERE registration_no = id AND course_code = course
+			AND status = 'A';
+
+		IF(Q1<Q2 && Q1<Q3) THEN
+			set top_two_total=q2+q3;
+		
+
+		ELSEIF(Q2<Q3 && Q2<Q1) then
+				set top_two_total=q3+q1;
+		
+		ELSE
+				set top_two_total=q1+q2;
+		END IF;
+			
+			SET final_ca_status = (top_two_total * 0.10) + (mid_marks * 0.25) + (assess_marks * 0.05);
+
+
+	IF(s_status='suspended')THEN
+
+		SELECT
+			id as registration_no,
+			course as course_code,
+			'wh' AS q1,
+            'wh' AS q2,
+            'wh' AS q3,
+            'wh' AS Assessment,
+            'wh' AS mid_marks,
+            'wh' AS final_ca_marks;
+	ELSE
+		SELECT 
+				id AS registration_no,
+				course AS course_code,
+				q1, q2, q3,
+				assess_marks AS Assesment,
+				mid_marks,
+				final_ca_status as final_ca_marks;
+	END IF;
+
+END//
+
+DELIMITER ;
+
+-- view CA mark detail by giving course code
+
+DELIMITER //
+
+CREATE PROCEDURE ca_batch_summary_update(IN course VARCHAR(10))
+BEGIN
+	DECLARE total_students INT DEFAULT 0;
+	DECLARE count INT  DEFAULT 0;
+	DECLARE reg_no VARCHAR(20);
+	DECLARE s_status VARCHAR(20);
+	
+	DECLARE q1, q2, q3, mid_marks, mt_mark,mp_mark,assess_marks, top_two_total, final_ca DECIMAL(5,2) DEFAULT 0;
+	DECLARE ca VARCHAR(20);
+
+	DROP TEMPORARY TABLE IF EXISTS temp_result;
+    CREATE TEMPORARY TABLE temp_result (
+        Registration_No VARCHAR(20),
+        Course_Code VARCHAR(20),
+        Q1 VARCHAR(20),
+        Q2 VARCHAR(20),
+        Q3 VARCHAR(20),
+        Mid_Marks VARCHAR(20),
+        Assessment_Marks VARCHAR(20),
+        Final_CA_Mark VARCHAR(20),
+        CA_Status VARCHAR(20)
+    );
+	
+	DROP TEMPORARY TABLE IF EXISTS temp_students;
+	
+	CREATE TEMPORARY TABLE temp_students AS
+        SELECT DISTINCT s.registration_no
+        FROM student s
+        JOIN marks m ON s.registration_no = m.registration_no
+        WHERE m.course_code = course;
+		
+		SELECT COUNT(*) INTO total_students FROM temp_students;
+		
+		WHILE count < total_students DO
+		SELECT registration_no INTO reg_no
+        FROM temp_students
+        LIMIT 1 OFFSET count;
+		
+		SELECT status INTO s_status
+		FROM student
+		WHERE registration_no = reg_no 
+		LIMIT 1;
+
+		IF s_status = 'suspended' THEN
+            INSERT INTO temp_result
+            VALUES (reg_no, course, 'wh','wh','wh','wh','wh','wh','wh');
+        ELSE
+
+
+		SELECT IFNULL(MAX(mark),0) INTO Q1
+		FROM marks
+		WHERE registration_no = reg_no AND course_code = course AND status = 'Q1';
+		
+		SELECT IFNULL(MAX(mark),0) INTO Q2
+		FROM marks
+		WHERE registration_no = reg_no AND course_code = course AND status = 'Q2';
+
+		SELECT IFNULL(MAX(mark),0) INTO Q3
+		FROM marks
+		WHERE registration_no = reg_no AND course_code = course AND status = 'Q3';
+
+		SELECT IFNULL(MAX(mark),0) INTO mt_mark
+		FROM marks
+		WHERE registration_no = reg_no AND course_code = course AND status = 'MT';
+
+		SELECT IFNULL(MAX(mark),0) INTO mp_mark		
+		FROM marks
+		WHERE registration_no = reg_no AND course_code = course AND status = 'MP';
+
+		IF (mt_mark > 0 AND mp_mark > 0) THEN
+		SET mid_marks = mt_mark + mp_mark;
+		ELSE
+		SET mid_marks = (mt_mark + mp_mark) * 2;
+		END IF;
+
+		SELECT IFNULL(SUM(mark),0)
+        INTO assess_marks
+        FROM marks
+        WHERE registration_no = reg_no AND course_code = course
+        AND status = 'A';
+		
+		if(Q1<Q2 && Q1<Q3) then
+			set top_two_total=q2+q3;
+	
+
+		elseif(Q2<Q3 && Q2<Q1) then
+			set top_two_total=q3+q1;
+	
+		else
+			set top_two_total=q1+q2;
+		end if;
+		
+		SET final_ca = (top_two_total * 0.10) + (mid_marks * 0.20) + (assess_marks * 0.05);
+
+		IF final_ca > (30 * 0.40) THEN
+            SET ca = 'CA_Pass';
+        ELSE
+            SET ca = 'CA_Fail';
+        END IF;
+
+		INSERT INTO temp_result
+        VALUES (reg_no,course, q1, q2, q3, mid_marks, assess_marks, final_ca,ca);
+	END IF;
+
+	SET count = count + 1;
+		
+    END WHILE; 
+
+	SELECT * FROM temp_result ORDER BY Registration_No;
+	
+	DROP TEMPORARY TABLE IF EXISTS temp_students;
+    DROP TEMPORARY TABLE IF EXISTS temp_result;
+END//
+
+DELIMITER ;
+
