@@ -1,0 +1,18 @@
+DELIMITER //
+CREATE PROCEDURE UpdateMedicalApproval(
+    IN p_registration_no VARCHAR(10),
+    IN p_attendance_id INT
+)
+BEGIN
+    UPDATE medical 
+    SET approval_status = 'approved'
+    WHERE attendance_id = p_attendance_id;
+    
+    UPDATE attendance 
+    SET status = 'medical'
+    WHERE attendance_id = p_attendance_id 
+      AND registration_no = p_registration_no;
+END //
+DELIMITER ;
+
+CALL UpdateMedicalApproval('S001', 31);

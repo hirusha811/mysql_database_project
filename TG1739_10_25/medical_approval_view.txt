@@ -1,0 +1,14 @@
+create view medical_approval as 
+	 select a.attendance_id,
+	        a.week_number,
+	        a.course,
+			m.approval_status,
+			a.status,
+			s.registration_no
+	from attendance a
+    inner join student s on s.registration_no=a.registration_no
+	inner join medical m on a.attendance_id=m.attendance_id
+	inner join course c on c.course_code=a.course
+	order by registration_no asc;
+	
+	select * from medical_approval;
