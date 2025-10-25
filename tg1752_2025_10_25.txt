@@ -1,0 +1,52 @@
+DELIMITER //
+
+CREATE PROCEDURE ViewAttendanceSummaryByStudent(IN p_registration_no CHAR(10))
+BEGIN
+  SELECT 
+    sc.course AS course_code,
+    c.course_name,
+    CASE 
+      WHEN c.course_type = 'BOTH' THEN calculate_attendance_percentage(p_registration_no, sc.course, 'B')
+      WHEN c.course_type = 'T' THEN calculate_attendance_percentage(p_registration_no, sc.course, 'T')
+      WHEN c.course_type = 'P' THEN calculate_attendance_percentage(p_registration_no, sc.course, 'P')
+    END AS percentage,
+    CASE 
+      WHEN c.course_type = 'BOTH' THEN IF(calculate_attendance_percentage(p_registration_no, sc.course, 'B') >= 80, 'Eligible', 'Not Eligible')
+      WHEN c.course_type = 'T' THEN IF(calculate_attendance_percentage(p_registration_no, sc.course, 'T') >= 80, 'Eligible', 'Not Eligible')
+      WHEN c.course_type = 'P' THEN IF(calculate_attendance_percentage(p_registration_no, sc.course, 'P') >= 80, 'Eligible', 'Not Eligible')
+    END AS eligibility
+  FROM stu_course sc
+  INNER JOIN course c ON sc.course = c.course_code
+  WHERE sc.registration_no = p_registration_no;
+END //
+
+DELIMITER ;
+
+
+
+
+DELIMITER //
+
+CREATE PROCEDURE ViewAttendanceSummaryByStudent(IN p_registration_no CHAR(10))
+BEGIN
+  SELECT 
+    sc.course AS course_code,
+    c.course_name,
+    CASE 
+      WHEN c.course_type = 'BOTH' THEN calculate_attendance_percentage(p_registration_no, sc.course, 'B')
+      WHEN c.course_type = 'T' THEN calculate_attendance_percentage(p_registration_no, sc.course, 'T')
+      WHEN c.course_type = 'P' THEN calculate_attendance_percentage(p_registration_no, sc.course, 'P')
+    END AS percentage,
+    CASE 
+      WHEN c.course_type = 'BOTH' THEN IF(calculate_attendance_percentage(p_registration_no, sc.course, 'B') >= 80, 'Eligible', 'Not Eligible')
+      WHEN c.course_type = 'T' THEN IF(calculate_attendance_percentage(p_registration_no, sc.course, 'T') >= 80, 'Eligible', 'Not Eligible')
+      WHEN c.course_type = 'P' THEN IF(calculate_attendance_percentage(p_registration_no, sc.course, 'P') >= 80, 'Eligible', 'Not Eligible')
+    END AS eligibility
+  FROM stu_course sc
+  INNER JOIN course c ON sc.course = c.course_code
+  WHERE sc.registration_no = p_registration_no;
+END //
+
+DELIMITER ;
+
+
