@@ -1,0 +1,86 @@
+DROP PROCEDURE one_student_allsubject;
+
+DELIMITER //
+
+CREATE PROCEDURE one_student_allsubject(
+  IN reg_no char(10)
+)
+	 
+BEGIN	
+
+  SELECT a.registration_no,
+         s.full_name as student_name,
+		 a.course,
+		 c.course_name,
+		 c.course_type,
+		 c.credits,
+		 count(*) as tot_ses,
+		 sum(a.status='present') as pre_co,
+		 sum(a.status='absent') as ab_co,
+		 sum(a.status='medical') as medical,
+		 round(sum(a.status='present')/count(*)*100,2) as `without_me_att_%`,
+		 round(sum(a.status in ('present','medical'))/count(*)*100,2) as `with_med_%`,
+		 
+		 if((round(sum(a.status in ('present','medical'))/count(*)*100))>=80,'elagible','notelagible') as eligibility
+		 
+		 from attendance a
+		 inner join course c on c.course_code = a.course
+		 inner join student s on s.registration_no=a.registration_no
+		 where a.registration_no=reg_no
+		 GROUP BY a.registration_no, s.full_name, s.batch_year, a.course, c.course_name, c.course_type, c.credits;
+		 
+END //
+
+DELIMITER ;
+
+CALL one_student_allsubject('S001');
+
+
+
+
+
+
+
+
+
+
+
+
+
+DROP PROCEDURE individuals_course_one_student;
+
+DELIMITER //
+
+CREATE PROCEDURE individuals_course_one_student(
+  IN reg_no CHAR(10),
+  IN course CHAR(10)
+)
+
+BEGIN
+
+SELECT a.registration_no as student_id,
+       s.full_name as s_name,
+       a.course,
+	   c.course_type as c_type,
+	   c.credits ,
+	   count(*) as t_session,
+	   sum(a.status='present') as pr_count,
+	   sum(a.status='absent') as ab_count,
+	   sum(a.status='medical') as med_count,
+	   
+	   round((sum(a.status='present')/count(*))*100,2) as `without_med_a%`,
+	   round((sum(a.status in ('present','medical'))/count(*))*100,2) as `with_med_a%`,
+	   if(round((sum(a.status in ('present','medical'))/count(*))*100,2)>=80,'elegible','notelegible') as elidibility
+	   
+FROM   attendance a
+inner join course c on c.course_code =a.course
+inner join student s on s.registration_no=a.registration_no
+
+where s.registration_no=reg_no and c.course_code=course
+GROUP BY a.registration_no, s.full_name, a.course, c.course_type, c.credits;
+
+END //
+
+DELIMITER ;
+
+CALL individuals_course_one_student('S001','ICT1233');
